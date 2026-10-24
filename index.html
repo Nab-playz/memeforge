@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemeForge — Create Your Meme</title>
+<style>
+:root {
+  --bg: #0b1020;
+  --panel: #151c30;
+  --purple: #9875ff;
+  --text: #f5f5ff;
+  --muted: #a8b0c8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+header {
+  padding: 22px 6%;
+  border-bottom: 1px solid #283149;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.logo { font-size: 25px; font-weight: 900; }
+.logo span { color: var(--purple); }
+header small { color: var(--muted); }
+main { max-width: 1100px; margin: auto; padding: 35px 20px; }
+.intro { text-align: center; margin-bottom: 30px; }
+.intro h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 10px; }
+.intro p { color: var(--muted); }
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 22px;
+  align-items: start;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid #29334d;
+  border-radius: 18px;
+  padding: 22px;
+  min-width: 0;
+}
+h2 { font-size: 19px; margin: 0 0 20px; }
+label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 16px 0 8px;
+}
+input, select, textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 9px;
+  border: 1px solid #36415d;
+  background: #0c1325;
+  color: var(--text);
+  font: inherit;
+}
+input[type="range"] { padding: 0; accent-color: var(--purple); }
+input[type="file"] { font-size: 12px; }
+input[type="color"] { height: 44px; padding: 4px; }
+textarea { resize: vertical; min-height: 68px; }
+.row { display: flex; gap: 12px; }
+.row > div { flex: 1; min-width: 0; }
+button {
+  padding: 12px 15px;
+  border: 0;
+  border-radius: 10px;
+  background: #29334d;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+button:hover { filter: brightness(1.15); }
+.primary { background: var(--purple); color: #100a24; }
+.actions { display: flex; gap: 10px; margin-top: 18px; }
+.actions button { flex: 1; }
+.preview {
+  background: #090e1b;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid #29334d;
+}
+canvas { display: block; width: 100%; height: auto; border-radius: 7px; }
+.hint { font-size: 12px; line-height: 1.6; color: var(--muted); }
+footer { text-align: center; padding: 25px; color: var(--muted); font-size: 12px; }
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  header { padding: 18px 20px; }
+  main { padding: 25px 14px; }
+  .panel { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">😂 Meme<span>Forge</span></div>
+  <small>Make it. Laugh. Share.</small>
+</header>
+
+<main>
+  <section class="intro">
+    <h1>Your joke. Your meme. 😎</h1>
+    <p>Create and download memes for free. No account needed.</p>
+  </section>
+
+  <div class="app">
+    <section class="panel">
+      <h2>🎨 Meme editor</h2>
+
+      <label for="template">Choose a background</label>
+      <select id="template">
+        <option value="classic">Classic Meme</option>
+        <option value="purple">Purple Dream</option>
+        <option value="sunset">Sunset Vibes</option>
+        <option value="matrix">Matrix Green</option>
+        <option value="sky">Ocean Blue</option>
+      </select>
+
+      <label for="upload">Or upload your own image</label>
+      <input id="upload" type="file" accept="image/*">
+
+      <label for="topText">Top caption</label>
+      <textarea id="topText" placeholder="WHEN THE EXAM IS TOMORROW...">WHEN THE EXAM IS TOMORROW...</textarea>
+
+      <label for="bottomText">Bottom caption</label>
+      <textarea id="bottomText" placeholder="AND YOU HAVEN'T STUDIED 😂">AND YOU HAVEN'T STUDIED 😂</textarea>
+
+      <div class="row">
+        <div>
+          <label for="fontSize">Font size</label>
+          <input id="fontSize" type="range" min="20" max="64" value="38">
+        </div>
+        <div>
+          <label for="textColor">Text colour</label>
+          <input id="textColor" type="color" value="#ffffff">
+        </div>
+      </div>
+
+      <label for="font">Font style</label>
+      <select id="font">
+        <option value="Impact">Impact — Classic</option>
+        <option value="Arial Black">Arial Black — Bold</option>
+        <option value="Arial">Arial — Simple</option>
+        <option value="sans-serif">Sans Serif</option>
+      </select>
+
+      <div class="actions">
+        <button id="randomBtn">🎲 Random joke</button>
+        <button id="resetBtn">↺ Reset</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>👀 Live preview</h2>
+      <div class="preview">
+        <canvas id="meme" width="600" height="600"></canvas>
+      </div>
+      <div class="actions">
+        <button class="primary" id="downloadBtn">⬇ Download PNG</button>
+      </div>
+      <p class="hint">Your meme is created right in your browser. Your selected image is not uploaded to a server by this tool.</p>
+      <p class="hint" id="status" role="status">Ready to create your masterpiece!</p>
+    </section>
+  </div>
+</main>
+
+<footer>Made with ❤️ by MemeForge · Free to use</footer>
+
+<script>
+const canvas = document.getElementById("meme");
+const ctx = canvas.getContext("2d");
+
+const fields = [
+  "template", "topText", "bottomText",
+  "fontSize", "textColor", "font"
+];
+
+let uploadedImage = null;
+let uploadURL = null;
+
+const backgrounds = {
+  classic: ["#3b3b3b", "#101010"],
+  purple: ["#a855f7", "#312e81"],
+  sunset: ["#fb7185", "#f97316"],
+  matrix: ["#14532d", "#052e16"],
+  sky: ["#38bdf8", "#1e3a8a"]
+};
+
+const jokes = [
+  ["ME: I'LL STUDY AT 6", "ALSO ME AT 11:59 😂"],
+  ["TEACHER: THIS IS EASY", "THE QUESTION PAPER: 💀"],
+  ["MOM: COME HERE", "ME: WHAT DID I DO NOW? 😭"],
+  ["WHEN WIFI STOPS WORKING", "MY WHOLE LIFE STOPS TOO 📶"],
+  ["EXAM TOMORROW", "SUDDENLY I WANT TO CLEAN MY ROOM"],
+  ["5 MORE MINUTES", "WAKES UP 3 HOURS LATER 💤"],
+  ["I HAVE A PLAN", "THE PLAN: PANIC 🤡"]
+];
+
+function drawBackground() {
+  const colors = backgrounds[document.getElementById("template").value];
+  const gradient = ctx.createLinearGradient(0, 0, 600, 600);
+  gradient.addColorStop(0, colors[0]);
+  gradient.addColorStop(1, colors[1]);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 600, 600);
+}
+
+function drawWrappedText(text, y, fontSize) {
+  if (!text.trim()) return;
+
+  ctx.font = `900 ${fontSize}px "${document.getElementById("font").value}", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = document.getElementById("textColor").value;
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = Math.max(3, fontSize / 9);
+  ctx.lineJoin = "round";
+
+  const maxWidth = 550;
+  const words = text.toLocaleUpperCase().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  for (const word of words) {
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+
+  const lineHeight = fontSize * 1.12;
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+
+  lines.forEach((item, index) => {
+    const lineY = startY + index * lineHeight;
+    ctx.strokeText(item, 300, lineY, maxWidth);
+    ctx.fillText(item, 300, lineY, maxWidth);
+  });
+}
+
+function renderMeme() {
+  drawBackground();
+
+  if (uploadedImage) {
+    const scale = Math.max(
+      600 / uploadedImage.width,
+      600 / uploadedImage.height
+    );
+    const width = uploadedImage.width * scale;
+    const height = uploadedImage.height * scale;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, 600, 600);
+    ctx.clip();
+    ctx.drawImage(
+      uploadedImage,
+      (600 - width) / 2,
+      (600 - height) / 2,
+      width,
+      height
+    );
+    ctx.restore();
+  }
+
+  const size = Number(document.getElementById("fontSize").value);
+  drawWrappedText(document.getElementById("topText").value, 65, size);
+  drawWrappedText(document.getElementById("bottomText").value, 535, size);
+}
+
+fields.forEach(id => {
+  document.getElementById(id).addEventListener("input", renderMeme);
+  document.getElementById(id).addEventListener("change", renderMeme);
+});
+
+document.getElementById("upload").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    document.getElementById("status").textContent =
+      "Please select an image file.";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    document.getElementById("status").textContent =
+      "Please choose an image smaller than 10 MB.";
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      uploadedImage = img;
+      renderMeme();
+      document.getElementById("status").textContent =
+        "Image loaded! Your meme is ready to customize.";
+    };
+    img.onerror = () => {
+      document.getElementById("status").textContent =
+        "Couldn't read that image. Please try another.";
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("randomBtn").addEventListener("click", () => {
+  const joke = jokes[Math.floor(Math.random() * jokes.length)];
+  document.getElementById("topText").value = joke[0];
+  document.getElementById("bottomText").value = joke[1];
+  renderMeme();
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("template").value = "classic";
+  document.getElementById("topText").value = "";
+  document.getElementById("bottomText").value = "";
+  document.getElementById("fontSize").value = "38";
+  document.getElementById("textColor").value = "#ffffff";
+  document.getElementById("font").value = "Impact";
+  document.getElementById("upload").value = "";
+  uploadedImage = null;
+  renderMeme();
+  document.getElementById("status").textContent = "Editor reset!";
+});
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  renderMeme();
+  canvas.toBlob(blob => {
+    if (!blob) {
+      document.getElementById("status").textContent =
+        "Download failed. Please try again.";
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "memeforge-meme.png";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    document.getElementById("status").textContent =
+      "Your meme download has started! 🎉";
+  }, "image/png");
+});
+
+renderMeme();
+</script>
+</body>
+</html>
